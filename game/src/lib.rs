@@ -2,6 +2,8 @@
 use fyrox::animation::spritesheet::SpriteSheetAnimation;
 use fyrox::core::algebra::Quaternion;
 use fyrox::plugin::PluginConstructor;
+use fyrox::scene::collider::Collider;
+use fyrox::scene::transform::Transform;
 use fyrox::{
     core::{
         algebra::{Vector2, Vector3,UnitQuaternion},
@@ -106,7 +108,7 @@ impl Plugin for Game {
         // Handle UI events here.
     }
 }
-#[derive(Visit, Reflect, Debug, Clone)]
+#[derive(Visit, Reflect, Debug, Clone,Default)]
 struct Player{
     sprite: Handle<Node>,
     move_left: bool,
@@ -120,20 +122,7 @@ struct Player{
 
 impl_component_provider!(Player,);
 
-impl Default for Player {
-    fn default() -> Self {
-        Self {
-            sprite: Handle::NONE,
-            move_left: false,
-            move_right: false,
-            move_up: false,
-            move_down: false,
-            reset: false,
-            animations: Default::default(),
-            current_animation: 0,
-        }
-    }
-}
+
 
 impl TypeUuidProvider for Player {
     // Returns unique script id for serialization needs.
