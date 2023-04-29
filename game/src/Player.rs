@@ -153,20 +153,7 @@ impl ScriptTrait for Player {
             }
 
             if(self.reset){
-                self.freemove = !self.freemove;
-                if (self.freemove){
-                    self.current_animation = 3;
-                    rigid_body.set_gravity_scale(0.0);
-                } else {
-                    rigid_body.set_ang_vel(0.0);
-                    rigid_body.set_gravity_scale(1.0);
-                }
-
-                self.reset=false;
-                let mut trans=rigid_body.local_transform().clone();
-                trans.set_rotation(UnitQuaternion::identity());
-                trans.set_position(Vector3::new(0.0, 2.0, 0.0));
-                rigid_body.set_local_transform(trans);
+                reset(&mut self.freemove,&mut self.current_animation,rigid_body,&mut self.reset);
             }
 
             if let Some(sprite) = context.scene.graph.try_get_mut(self.sprite) {
@@ -221,4 +208,21 @@ impl ScriptTrait for Player {
         Self::type_uuid()
     }
     
+}
+
+fn reset(freemove: &mut bool,current_animation: &mut u32,rigid_body: &mut RigidBody,reset: &mut bool){
+    *freemove = !*freemove;
+                if (*freemove){
+                    *current_animation = 3;
+                    rigid_body.set_gravity_scale(0.0);
+                } else {
+                    rigid_body.set_ang_vel(0.0);
+                    rigid_body.set_gravity_scale(1.0);
+                }
+
+                *reset = false;
+                let mut trans=rigid_body.local_transform().clone();
+                trans.set_rotation(UnitQuaternion::identity());
+                trans.set_position(Vector3::new(0.0, 2.0, 0.0));
+                rigid_body.set_local_transform(trans);
 }
