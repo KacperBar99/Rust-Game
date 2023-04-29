@@ -2,7 +2,7 @@
 use fyrox::animation;
 use fyrox::animation::machine::node;
 use fyrox::animation::spritesheet::SpriteSheetAnimation;
-use fyrox::core::algebra::Quaternion;
+use fyrox::core::algebra::{Quaternion, ComplexField};
 use fyrox::core::color::Color;
 use fyrox::core::reflect::GetField;
 use fyrox::gui::inspector::Value;
@@ -134,7 +134,7 @@ impl ScriptTrait for Player {
                 }
             }
             else {
-                if(self.move_up && rigid_body.lin_vel().y.abs() <0.01){
+                if self.move_up && rigid_body.lin_vel().y.abs() <0.01 {
                     rigid_body.set_lin_vel(Vector2::new(x_speed,4.0));
                 }
                 else{
@@ -146,13 +146,19 @@ impl ScriptTrait for Player {
                 } else {
                     self.current_animation = 0;
                 }
+
+                if rigid_body.lin_vel()[1].abs()>= 0.01 {
+                    self.current_animation = 2;
+                }
             }
 
             if(self.reset){
                 self.freemove = !self.freemove;
                 if (self.freemove){
+                    self.current_animation = 3;
                     rigid_body.set_gravity_scale(0.0);
                 } else {
+                    rigid_body.set_ang_vel(0.0);
                     rigid_body.set_gravity_scale(1.0);
                 }
 
