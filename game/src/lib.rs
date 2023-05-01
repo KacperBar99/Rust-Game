@@ -52,6 +52,8 @@ use fyrox::{
 
 
 pub mod Player;
+pub mod DeathBall;
+pub mod Spikes;
 
 pub struct GameConstructor;
 
@@ -60,6 +62,8 @@ impl PluginConstructor for GameConstructor {
         let script_constructors = &context.serialization_context.script_constructors;
         script_constructors.add::<Player::Player>("Player");
         script_constructors.add::<Player::Points::Points>("Points");
+        script_constructors.add::<DeathBall::DeathBall>("DeathBall");
+        script_constructors.add::<Spikes::Spikes>("Spikes");
     }
 
     fn create_instance(

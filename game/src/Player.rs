@@ -1,4 +1,3 @@
-
 use fyrox::animation;
 use fyrox::animation::machine::node;
 use fyrox::animation::spritesheet::SpriteSheetAnimation;
@@ -63,6 +62,7 @@ pub struct Player{
     animations: Vec<SpriteSheetAnimation>,
     current_animation: u32,
     freemove: bool,
+    death_line: f32,
 }
 
 impl_component_provider!(Player);
@@ -109,6 +109,9 @@ impl ScriptTrait for Player {
         
         if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<RigidBody>() {
 
+            if rigid_body.local_transform().position()[1] <= self.death_line {
+                reset(&mut self.freemove,&mut self.current_animation,rigid_body,&mut self.reset);
+            }
             
             let x_speed = match (self.move_left, self.move_right) {
                 (true, false) => 3.0,
@@ -135,7 +138,7 @@ impl ScriptTrait for Player {
             }
             else {
                 if self.move_up && rigid_body.lin_vel().y.abs() <0.01 {
-                    rigid_body.set_lin_vel(Vector2::new(x_speed,4.0));
+                    rigid_body.set_lin_vel(Vector2::new(x_speed,5.0));
                 }
                 else{
                     rigid_body.set_lin_vel(Vector2::new(x_speed,rigid_body.lin_vel().y));
@@ -171,11 +174,7 @@ impl ScriptTrait for Player {
                     ));
                 }
             }
-
             
-            
-               
-
             if let Some(current_animation) = self.animations.get_mut(self.current_animation as usize) {
                 current_animation.update(context.dt);
     
