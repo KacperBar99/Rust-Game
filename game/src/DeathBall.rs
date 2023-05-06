@@ -50,6 +50,7 @@ use fyrox::{
 
 #[derive(Visit, Reflect, Debug, Clone, Default)]
 pub struct DeathBall {
+    check_point: Handle<Node>,
     size: f32,
     player: Handle<Node>,
     yspeed: f32,
@@ -101,6 +102,12 @@ impl ScriptTrait for DeathBall {
     fn on_os_event(&mut self, event: &Event<()>, context: &mut ScriptContext) {}
 
     fn on_update(&mut self, context: &mut ScriptContext) {
+        let mut checkpoint_x = 0.0;
+        let mut checkpoint_y = 0.0;
+        if let Some(transform) = context.scene.graph.try_get(self.check_point) {
+            checkpoint_x = transform.local_transform().position()[0];
+            checkpoint_y = transform.local_transform().position()[1];
+        }
         if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<RigidBody>() {
             self.x  = rigid_body.local_transform().position()[0];
                 
@@ -147,7 +154,7 @@ impl ScriptTrait for DeathBall {
 
             if distance <= self.size {
                 let mut trans=player.local_transform().clone();
-                trans.set_position(Vector3::new(0.0, 2.0, 0.0));
+                trans.set_position(Vector3::new(checkpoint_x, checkpoint_y, 0.0));
                 player.set_local_transform(trans);
             }
         }

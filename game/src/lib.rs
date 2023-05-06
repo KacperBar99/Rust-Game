@@ -54,7 +54,9 @@ use fyrox::{
 pub mod Player;
 pub mod DeathBall;
 pub mod Spikes;
-
+pub mod CheckPoint;
+pub mod Victory;
+pub mod SimpleAnimation;
 pub struct GameConstructor;
 
 impl PluginConstructor for GameConstructor {
@@ -64,6 +66,9 @@ impl PluginConstructor for GameConstructor {
         script_constructors.add::<Player::Points::Points>("Points");
         script_constructors.add::<DeathBall::DeathBall>("DeathBall");
         script_constructors.add::<Spikes::Spikes>("Spikes");
+        script_constructors.add::<CheckPoint::CheckPoint>("CheckPoint");
+        script_constructors.add::<Victory::Victory>("Vicotry");
+        script_constructors.add::<SimpleAnimation::SimpleAnimation>("SimpleAnimation");
     }
 
     fn create_instance(

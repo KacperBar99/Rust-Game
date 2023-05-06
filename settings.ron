@@ -1,7 +1,7 @@
 (
     selection: (
         ignore_back_faces: false,
-        track_selection: true,
+        track_selection: false,
     ),
     graphics: (
         quality: (
@@ -62,12 +62,12 @@
         camera_settings: {
             "data/scene.rgs": (
                 position: [
-                    -2.826865,
-                    0.09972407,
+                    -4.288113,
+                    0.28135878,
                     -3.0,
                 ],
-                yaw: -3.0599997,
-                pitch: 0.36920273,
+                yaw: -5.2000055,
+                pitch: 0.61920244,
             ),
         },
     ),

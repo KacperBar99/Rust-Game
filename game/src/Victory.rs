@@ -1,7 +1,7 @@
 use fyrox::animation;
 use fyrox::animation::machine::node;
 use fyrox::animation::spritesheet::SpriteSheetAnimation;
-use fyrox::core::algebra::{ComplexField, Quaternion, distance};
+use fyrox::core::algebra::{distance, ComplexField, Quaternion};
 use fyrox::core::color::Color;
 use fyrox::core::reflect::GetField;
 use fyrox::gui::inspector::Value;
@@ -49,25 +49,25 @@ use fyrox::{
 };
 
 #[derive(Visit, Reflect, Debug, Clone, Default)]
-pub struct Spikes {
+pub struct Victory {
     size: f32,
-    check_point: Handle<Node>,
     player: Handle<Node>,
     sprite: Handle<Node>,
+    victory_info: Handle<Sprite>,
     animations: Vec<SpriteSheetAnimation>,
-    x:f32,
-    y:f32,
+    x: f32,
+    y: f32,
 }
 
-impl_component_provider!(Spikes);
+impl_component_provider!(Victory);
 
-impl TypeUuidProvider for Spikes {
+impl TypeUuidProvider for Victory {
     fn type_uuid() -> Uuid {
-        uuid!("c5671f19-9f2b-4286-8486-add4efaadaec")
+        uuid!("c6889f19-9f2b-4286-8486-add4efaadaec")
     }
 }
 
-impl ScriptTrait for Spikes {
+impl ScriptTrait for Victory {
     fn id(&self) -> Uuid {
         Self::type_uuid()
     }
@@ -75,57 +75,55 @@ impl ScriptTrait for Spikes {
     fn on_init(&mut self, context: &mut ScriptContext) {}
 
     // Put start logic - it is called when every other script is already initialized.
-    fn on_start(&mut self, context: &mut ScriptContext) {
-    }
+    fn on_start(&mut self, context: &mut ScriptContext) {}
 
     // Called whenever there is an event from OS (mouse click, keypress, etc.)
     fn on_os_event(&mut self, event: &Event<()>, context: &mut ScriptContext) {}
 
     fn on_update(&mut self, context: &mut ScriptContext) {
-        let mut checkpoint_x = 0.0;
-        let mut checkpoint_y = 0.0;
-        if let Some(transform) = context.scene.graph.try_get(self.check_point) {
-            checkpoint_x = transform.local_transform().position()[0];
-            checkpoint_y = transform.local_transform().position()[1];
+        if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<Sprite>() {
+            self.x = rigid_body.local_transform().position()[0];
+            self.y = rigid_body.local_transform().position()[1];
         }
-        if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<RigidBody>() {
-            self.x  = rigid_body.local_transform().position()[0];             
-            self.y  = rigid_body.local_transform().position()[1];
 
-            if let Some(current_animation) = self.animations.get_mut(0) {
-                current_animation.update(context.dt);
+        if let Some(player) = context.scene.graph[self.player].cast_mut::<RigidBody>() {
+            let x = player.local_transform().position()[0];
+            let y = player.local_transform().position()[1];
+            let distance = ((self.x - x).abs() + (self.y - y).abs()).sqrt();
 
+            if distance <= self.size {
                 if let Some(sprite) = context
                     .scene
                     .graph
                     .try_get_mut(self.sprite)
-                    .and_then(|n| n.cast_mut::<Rectangle>())
+                    .and_then(|n| n.cast_mut::<Sprite>())
                 {
-                    sprite.set_texture(current_animation.texture());
-                    sprite.set_uv_rect(
-                        current_animation
-                            .current_frame_uv_rect()
-                            .unwrap_or_default(),
-                    );
+                    sprite.set_enabled(true);
                 }
             }
         }
-        if let Some(player) = context.scene.graph[self.player].cast_mut::<RigidBody>() {
-            let x = player.local_transform().position()[0];
-            let y = player.local_transform().position()[1];
-            let distance = ((self.x-x).abs()+(self.y-y).abs()).sqrt();
+        if let Some(current_animation) = self.animations.get_mut(0) {
+            current_animation.update(context.dt);
 
-            if distance <= self.size {
-                let mut trans=player.local_transform().clone();
-                trans.set_position(Vector3::new(checkpoint_x, checkpoint_y, 0.0));
-                player.set_local_transform(trans);
+            if let Some(sprite) = context
+                .scene
+                .graph
+                .try_get_mut(self.sprite)
+                .and_then(|n| n.cast_mut::<Rectangle>())
+            {
+                sprite.set_texture(current_animation.texture());
+                sprite.set_uv_rect(
+                    current_animation
+                        .current_frame_uv_rect()
+                        .unwrap_or_default(),
+                );
             }
         }
     }
-    
-    fn restore_resources(&mut self, resource_manager: ResourceManager) {
-        for animation in self.animations.iter_mut() {
-            animation.restore_resources(&resource_manager);
-        }
-    }
+
+    // fn restore_resources(&mut self, resource_manager: ResourceManager) {
+    //     for animation in self.animations.iter_mut() {
+    //         animation.restore_resources(&resource_manager);
+    //     }
+    // }
 }
