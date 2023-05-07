@@ -118,7 +118,7 @@ impl ScriptTrait for DeathBall {
             self.y  = rigid_body.local_transform().position()[1];
                 
             
-            if (rigid_body.lin_vel()[0].abs() <= 0.1 && rigid_body.lin_vel()[1].abs() <= 0.1){
+            if (rigid_body.lin_vel()[0].abs() < 1.0 && rigid_body.lin_vel()[1].abs() <= 0.1){
                 
                 self.speed = -self.speed;
 
