@@ -8,6 +8,7 @@ use fyrox::gui::inspector::Value;
 use fyrox::gui::text::Text;
 use fyrox::plugin::PluginConstructor;
 use fyrox::scene::collider::Collider;
+use fyrox::scene::dim2::rigidbody;
 use fyrox::scene::sprite::{self, Sprite};
 use fyrox::scene::transform::Transform;
 use fyrox::{
@@ -64,6 +65,7 @@ pub struct Player {
     current_animation: u32,
     freemove: bool,
     death_line: f32,
+    fix: bool,
 }
 
 impl_component_provider!(Player);
@@ -95,6 +97,7 @@ impl ScriptTrait for Player {
                         VirtualKeyCode::W => self.move_up = is_pressed,
                         VirtualKeyCode::S => self.move_down = is_pressed,
                         VirtualKeyCode::Space => self.reset = is_pressed,
+                        VirtualKeyCode::R => self.fix = is_pressed,
                         _ => (),
                     }
                 }
@@ -110,6 +113,9 @@ impl ScriptTrait for Player {
             checkpoint_y = transform.local_transform().position()[1];
         }
         if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<RigidBody>() {
+            if self.fix {
+                fix(rigid_body, &mut self.fix);
+            }
             if rigid_body.local_transform().position()[1] <= self.death_line {
                 reset(rigid_body, &mut self.reset, checkpoint_x, checkpoint_y);
             }
@@ -214,6 +220,17 @@ fn reset(rigid_body: &mut RigidBody, reset: &mut bool, pos_x: f32, pos_y: f32) {
     let mut trans = rigid_body.local_transform().clone();
     trans.set_rotation(UnitQuaternion::identity());
     trans.set_position(Vector3::new(pos_x, pos_y, 0.0));
+    rigid_body.set_local_transform(trans);
+}
+fn fix(rigid_body: &mut RigidBody, reset: &mut bool) {
+    *reset = false;
+    let mut trans = rigid_body.local_transform().clone();
+    trans.set_rotation(UnitQuaternion::identity());
+    trans.set_position(Vector3::new(
+        trans.position()[0],
+        trans.position()[1] + 0.5,
+        0.0,
+    ));
     rigid_body.set_local_transform(trans);
 }
 fn change_mode(freemove: &mut bool, rigid_body: &mut RigidBody, current_animation: &mut u32) {
