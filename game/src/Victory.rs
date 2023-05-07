@@ -50,20 +50,24 @@ use fyrox::{
 
 #[derive(Visit, Reflect, Debug, Clone, Default)]
 pub struct Victory {
-    size: f32,
     player: Handle<Node>,
     sprite: Handle<Node>,
-    victory_info: Handle<Sprite>,
     animations: Vec<SpriteSheetAnimation>,
     x: f32,
     y: f32,
+    floating_checkpoint: Handle<Node>,
+    timer: f32,
+    won: bool,
+    time: f32,
+    size: f32,
+    victory_info: Handle<Node>,
 }
 
 impl_component_provider!(Victory);
 
 impl TypeUuidProvider for Victory {
     fn type_uuid() -> Uuid {
-        uuid!("c6889f19-9f2b-4286-8486-add4efaadaec")
+        uuid!("c6886f19-9f2b-4286-8486-add4efaadaec")
     }
 }
 
@@ -75,15 +79,55 @@ impl ScriptTrait for Victory {
     fn on_init(&mut self, context: &mut ScriptContext) {}
 
     // Put start logic - it is called when every other script is already initialized.
-    fn on_start(&mut self, context: &mut ScriptContext) {}
+    fn on_start(&mut self, context: &mut ScriptContext) {
+        if let Some(sprite) = context
+            .scene
+            .graph
+            .try_get_mut(self.sprite)
+            .and_then(|n| n.cast_mut::<Rectangle>())
+        {
+            self.x = sprite.local_transform().position()[0];
+            self.y = sprite.local_transform().position()[1];
+        }
+        if let Some(sprite) = context
+            .scene
+            .graph
+            .try_get_mut(self.victory_info)
+            .and_then(|n| n.cast_mut::<Rectangle>())
+        {
+            sprite.set_visibility(false);
+        }
+    }
 
     // Called whenever there is an event from OS (mouse click, keypress, etc.)
     fn on_os_event(&mut self, event: &Event<()>, context: &mut ScriptContext) {}
 
     fn on_update(&mut self, context: &mut ScriptContext) {
-        if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<Sprite>() {
-            self.x = rigid_body.local_transform().position()[0];
-            self.y = rigid_body.local_transform().position()[1];
+        if let Some(sprite) = context
+            .scene
+            .graph
+            .try_get_mut(self.sprite)
+            .and_then(|n| n.cast_mut::<Rectangle>())
+        {
+            self.x = sprite.local_transform().position()[0];
+            self.y = sprite.local_transform().position()[1];
+        }
+
+        if self.won {
+            self.timer = self.timer + context.dt;
+
+            if self.timer >= self.time {
+                self.won = false;
+                self.timer = 0.0;
+                if let Some(sprite) = context
+                    .scene
+                    .graph
+                    .try_get_mut(self.victory_info)
+                    .and_then(|n| n.cast_mut::<Rectangle>())
+                {
+                    sprite.set_visibility(false);
+                }
+            }
         }
 
         if let Some(player) = context.scene.graph[self.player].cast_mut::<RigidBody>() {
@@ -92,13 +136,30 @@ impl ScriptTrait for Victory {
             let distance = ((self.x - x).abs() + (self.y - y).abs()).sqrt();
 
             if distance <= self.size {
+                //teleporting player to the start
+                let mut trans = player.local_transform().clone();
+                trans.set_position(Vector3::new(0.0, 0.0, 0.0));
+                player.set_local_transform(trans);
+                self.won = true;
+                //Setting info about beating the game
                 if let Some(sprite) = context
                     .scene
                     .graph
-                    .try_get_mut(self.sprite)
-                    .and_then(|n| n.cast_mut::<Sprite>())
+                    .try_get_mut(self.victory_info)
+                    .and_then(|n| n.cast_mut::<Rectangle>())
                 {
-                    sprite.set_enabled(true);
+                    sprite.set_visibility(true);
+                }
+                //changing checkpoint
+                if let Some(floater) = context
+                    .scene
+                    .graph
+                    .try_get_mut(self.floating_checkpoint)
+                    .and_then(|n| n.cast_mut::<Rectangle>())
+                {
+                    floater
+                        .local_transform_mut()
+                        .set_position(Vector3::new(0.0, 0.0, 1.0));
                 }
             }
         }
@@ -121,9 +182,9 @@ impl ScriptTrait for Victory {
         }
     }
 
-    // fn restore_resources(&mut self, resource_manager: ResourceManager) {
-    //     for animation in self.animations.iter_mut() {
-    //         animation.restore_resources(&resource_manager);
-    //     }
-    // }
+    fn restore_resources(&mut self, resource_manager: ResourceManager) {
+        for animation in self.animations.iter_mut() {
+            animation.restore_resources(&resource_manager);
+        }
+    }
 }

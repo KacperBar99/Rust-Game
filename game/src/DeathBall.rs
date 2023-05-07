@@ -82,6 +82,10 @@ impl ScriptTrait for DeathBall {
     // Put start logic - it is called when every other script is already initialized.
     fn on_start(&mut self, context: &mut ScriptContext) {
 
+        if let Some(rigid_body) = context.scene.graph[context.handle].cast_mut::<Rectangle>() {
+            self.x = rigid_body.local_transform().position()[0];
+            self.y = rigid_body.local_transform().position()[1];
+        }
         if let Some (rigidbody) = context.scene.graph[context.handle].cast_mut::<RigidBody>(){
 
             rigidbody.set_gravity_scale(0.0);

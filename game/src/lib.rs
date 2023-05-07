@@ -67,7 +67,7 @@ impl PluginConstructor for GameConstructor {
         script_constructors.add::<DeathBall::DeathBall>("DeathBall");
         script_constructors.add::<Spikes::Spikes>("Spikes");
         script_constructors.add::<CheckPoint::CheckPoint>("CheckPoint");
-        script_constructors.add::<Victory::Victory>("Vicotry");
+        script_constructors.add::<Victory::Victory>("Victory");
         script_constructors.add::<SimpleAnimation::SimpleAnimation>("SimpleAnimation");
     }
 

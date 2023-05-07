@@ -75,7 +75,17 @@ impl ScriptTrait for CheckPoint {
     fn on_init(&mut self, context: &mut ScriptContext) {}
 
     // Put start logic - it is called when every other script is already initialized.
-    fn on_start(&mut self, context: &mut ScriptContext) {}
+    fn on_start(&mut self, context: &mut ScriptContext) {
+        if let Some(sprite) = context
+            .scene
+            .graph
+            .try_get_mut(self.sprite)
+            .and_then(|n| n.cast_mut::<Rectangle>())
+        {
+            self.x = sprite.local_transform().position()[0];
+            self.y = sprite.local_transform().position()[1];
+        }
+    }
 
     // Called whenever there is an event from OS (mouse click, keypress, etc.)
     fn on_os_event(&mut self, event: &Event<()>, context: &mut ScriptContext) {}
