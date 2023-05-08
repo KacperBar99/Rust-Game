@@ -50,7 +50,9 @@ use std::convert::TryInto;
 
 #[derive(Visit, Reflect, Debug, Clone, Default)]
 pub struct Points {
-    rigidbody: Handle<Node>,
+    distance: bool,
+    player: Handle<Node>,
+    time: f32,
     value: i32,
     values: Vec<SpriteSheetAnimation>,
     text: Handle<Node>,
@@ -75,14 +77,30 @@ impl ScriptTrait for Points {
             value.restore_resources(&resource_manager);
         }
     }
+    fn on_start(&mut self, #[allow(unused_variables)] ctx: &mut ScriptContext) {
+        self.time = 999.0;
+    }
 
     fn on_update(&mut self, context: &mut ScriptContext) {
         let mut pos = 1.0;
-        if let Some(body) = context.scene.graph.try_get(self.rigidbody) {
-            pos = body.as_rigid_body2d().local_transform().position()[0];
-        }
 
-        self.value = (pos).abs().round() as i32;
+        if self.distance{
+            if let Some(body) = context.scene.graph.try_get(self.player) {
+                pos = body.as_rigid_body2d().local_transform().position()[0];
+                self.value = (pos).abs().round() as i32;
+            }
+        } else {
+            if self.time >= 0.0 {
+                self.time=self.time-context.dt;
+            }
+            else {
+                self.time = 0.0;
+            }
+            self.value = self.time.round() as i32;
+        }
+        
+
+        
 
         if let Some(animation) = self.values.get_mut(0) {
             let mut val: usize = (self.value).try_into().unwrap();

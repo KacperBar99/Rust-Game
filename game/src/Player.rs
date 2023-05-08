@@ -66,6 +66,7 @@ pub struct Player {
     freemove: bool,
     death_line: f32,
     fix: bool,
+    mode: bool,
 }
 
 impl_component_provider!(Player);
@@ -98,6 +99,11 @@ impl ScriptTrait for Player {
                         VirtualKeyCode::S => self.move_down = is_pressed,
                         VirtualKeyCode::Space => self.reset = is_pressed,
                         VirtualKeyCode::R => self.fix = is_pressed,
+                        VirtualKeyCode::Z => self.mode = is_pressed,
+                        VirtualKeyCode::Right => self.move_right = is_pressed,
+                        VirtualKeyCode::Left => self.move_left = is_pressed,
+                        VirtualKeyCode::Down => self.move_down = is_pressed,
+                        VirtualKeyCode::Up => self.move_up = is_pressed,
                         _ => (),
                     }
                 }
@@ -116,6 +122,12 @@ impl ScriptTrait for Player {
             if self.fix {
                 fix(rigid_body, &mut self.fix);
             }
+
+            if self.mode {
+                self.mode = false;
+                change_mode(&mut self.freemove, rigid_body, &mut self.current_animation)
+            }
+
             if rigid_body.local_transform().position()[1] <= self.death_line {
                 reset(rigid_body, &mut self.reset, checkpoint_x, checkpoint_y);
             }
@@ -137,7 +149,7 @@ impl ScriptTrait for Player {
                 if (self.move_up || self.move_down) {
                     let rotation = rigid_body.local_transform().rotation().euler_angles();
                     rigid_body.set_lin_vel(
-                        Vector2::new(rotation.2.sin(), -rotation.2.cos()) * y_speed * -1.0,
+                        Vector2::new(rotation.2.sin(), -rotation.2.cos()) * y_speed * -1.0 * 2.0,
                     );
                 } else {
                     rigid_body.set_lin_vel(Vector2::new(0.0, 0.0));
@@ -239,6 +251,9 @@ fn change_mode(freemove: &mut bool, rigid_body: &mut RigidBody, current_animatio
         *current_animation = 3;
         rigid_body.set_gravity_scale(0.0);
     } else {
+        rigid_body
+            .local_transform_mut()
+            .set_rotation(UnitQuaternion::identity());
         rigid_body.set_ang_vel(0.0);
         rigid_body.set_gravity_scale(1.0);
     }
