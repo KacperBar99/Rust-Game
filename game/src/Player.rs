@@ -129,7 +129,7 @@ impl ScriptTrait for Player {
             }
 
             if rigid_body.local_transform().position()[1] <= self.death_line {
-                reset(rigid_body, &mut self.reset, checkpoint_x, checkpoint_y);
+                reset(rigid_body, &mut self.reset, dbg!(checkpoint_x), checkpoint_y);
             }
 
             let x_speed = match (self.move_left, self.move_right) {

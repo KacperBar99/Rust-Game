@@ -1,62 +1,49 @@
 //! Game project.
-use fyrox::animation;
-use fyrox::animation::machine::node;
-use fyrox::animation::spritesheet::SpriteSheetAnimation;
-use fyrox::core::algebra::Quaternion;
-use fyrox::core::color::Color;
-use fyrox::core::reflect::GetField;
-use fyrox::gui::inspector::Value;
-use fyrox::gui::text::Text;
 use fyrox::plugin::PluginConstructor;
-use fyrox::scene::collider::Collider;
-use fyrox::scene::sprite::{Sprite, self};
-use fyrox::scene::transform::Transform;
+use fyrox::scene::sprite::{self, Sprite};
 use fyrox::{
     core::{
-        algebra::{Vector2, Vector3,UnitQuaternion},
+        algebra::{UnitQuaternion, Vector2, Vector3},
         futures::executor::block_on,
         pool::Handle,
         reflect::prelude::*,
         uuid::{uuid, Uuid},
         visitor::prelude::*,
     },
-    engine::{
-        executor::Executor, resource_manager::ResourceManager, 
-    },
+    engine::{executor::Executor, resource_manager::ResourceManager},
     event::{ElementState, Event, VirtualKeyCode, WindowEvent},
-    impl_component_provider,
-    plugin::{Plugin,PluginContext, PluginRegistrationContext},
-    resource::texture::Texture,
-    scene::{
-        dim2::{rectangle::Rectangle, rigidbody::RigidBody},
-        node::{Node, TypeUuidProvider},
-        Scene, SceneLoader,
-        loader::AsyncSceneLoader,
-        base::BaseBuilder,
-        camera::{CameraBuilder, OrthographicProjection, Projection},
-        dim2::rectangle::RectangleBuilder,
-        light::{point::PointLightBuilder, spot::SpotLightBuilder, BaseLightBuilder},
-        transform::TransformBuilder,
-    },
-    script::{ScriptContext, ScriptTrait},
-    utils::log::Log,
     event_loop::ControlFlow,
     gui::{
-        message::UiMessage,
         message::MessageDirection,
+        message::UiMessage,
         text::{TextBuilder, TextMessage},
         widget::WidgetBuilder,
         UiNode,
     },
+    impl_component_provider,
+    plugin::{Plugin, PluginContext, PluginRegistrationContext},
+    resource::texture::Texture,
+    scene::{
+        base::BaseBuilder,
+        camera::{CameraBuilder, OrthographicProjection, Projection},
+        dim2::rectangle::RectangleBuilder,
+        dim2::{rectangle::Rectangle, rigidbody::RigidBody},
+        light::{point::PointLightBuilder, spot::SpotLightBuilder, BaseLightBuilder},
+        loader::AsyncSceneLoader,
+        node::{Node, TypeUuidProvider},
+        transform::TransformBuilder,
+        Scene, SceneLoader,
+    },
+    script::{ScriptContext, ScriptTrait},
+    utils::log::Log,
 };
 
-
-pub mod Player;
-pub mod DeathBall;
-pub mod Spikes;
 pub mod CheckPoint;
-pub mod Victory;
+pub mod DeathBall;
+pub mod Player;
 pub mod SimpleAnimation;
+pub mod Spikes;
+pub mod Victory;
 pub struct GameConstructor;
 
 impl PluginConstructor for GameConstructor {
@@ -109,7 +96,7 @@ impl Plugin for Game {
     }
 
     fn update(&mut self, context: &mut PluginContext, _control_flow: &mut ControlFlow) {
-         if let Some(loader) = self.loader.as_ref() {
+        if let Some(loader) = self.loader.as_ref() {
             if let Some(result) = loader.fetch_result() {
                 match result {
                     Ok(scene) => {
@@ -119,7 +106,7 @@ impl Plugin for Game {
                 }
             }
         }
-    
+
         // Add your global update code here.
     }
 
@@ -141,8 +128,3 @@ impl Plugin for Game {
         // Handle UI events here.
     }
 }
-
-
-
-
-

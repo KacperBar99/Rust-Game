@@ -3,6 +3,7 @@ use fyrox::animation::machine::node;
 use fyrox::animation::spritesheet::SpriteSheetAnimation;
 use fyrox::core::algebra::{ComplexField, Quaternion, distance};
 use fyrox::core::color::Color;
+use fyrox::core::math::Vector3Ext;
 use fyrox::core::reflect::GetField;
 use fyrox::gui::inspector::Value;
 use fyrox::gui::text::Text;
@@ -117,7 +118,7 @@ impl ScriptTrait for Spikes {
         if let Some(player) = context.scene.graph[self.player].cast_mut::<RigidBody>() {
             let x = player.local_transform().position()[0];
             let y = player.local_transform().position()[1];
-            let distance = ((self.x-x).abs()+(self.y-y).abs()).sqrt();
+            let distance = ((self.x-x).powf(2.0)+(self.y-y).powf(2.0)).sqrt();
 
             if distance <= self.size {
                 let mut trans=player.local_transform().clone();

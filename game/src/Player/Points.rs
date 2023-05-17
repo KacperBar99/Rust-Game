@@ -82,7 +82,7 @@ impl ScriptTrait for Points {
     }
 
     fn on_update(&mut self, context: &mut ScriptContext) {
-        let mut pos = 1.0;
+        let mut pos: f32 = 1.0;
 
         if self.distance{
             if let Some(body) = context.scene.graph.try_get(self.player) {
@@ -99,9 +99,6 @@ impl ScriptTrait for Points {
             self.value = self.time.round() as i32;
         }
         
-
-        
-
         if let Some(animation) = self.values.get_mut(0) {
             let mut val: usize = (self.value).try_into().unwrap();
             val = (val / 100) % 10;
